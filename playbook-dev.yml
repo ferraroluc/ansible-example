@@ -1,40 +1,40 @@
 ---
-- name: Instalar Nginx
+- name: Install and configure Nginx
   hosts: dev
   become: yes
   vars:
     server_name: "{{ ansible_default_ipv4.address }}"
     document_root: /var/www
-    app_root: holamundo
+    app_root: helloworld
 
   tasks:
-    - name: Instalar Nginx
+    - name: Install Nginx
       apt:
         name: nginx
         state: latest
         update_cache: yes
 
-    - name: Copiar sitio web
+    - name: Copy website
       copy:
         src: "{{ app_root }}"
         dest: "{{ document_root }}"
         mode: preserve
 
-    - name: Aplicar config de Nginx
+    - name: Config Nginx
       template:
         src: templates/nginx.conf.j2
         dest: /etc/nginx/sites-available/default
-      notify: Reiniciar Nginx
+      notify: Restart Nginx
 
-    - name: Habilitar sitio nuevo
+    - name: Enable new site
       file:
         src: /etc/nginx/sites-available/default
         dest: /etc/nginx/sites-enabled/default
         state: link
-      notify: Reiniciar Nginx
+      notify: Restart Nginx
 
   handlers:
-    - name: Reiniciar Nginx
+    - name: Restart Nginx
       service:
         name: nginx
         state: restarted
